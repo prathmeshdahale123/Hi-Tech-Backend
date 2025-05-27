@@ -1,0 +1,95 @@
+Project Prompt: Hi-Tech Institute Admin Backend (Production-Grade)
+🧠 Objective:
+Build a secure, production-ready backend for the Hi-Tech Institute of Technology website. The backend should enable admin users to authenticate themselves and upload/update notices that will be displayed on the frontend "Notice Board".
+
+📌 Key Features:
+✅ 1. Admin Authentication
+Only verified admins can log in and access protected routes.
+
+Admin login should be secure with JWT-based token authentication.
+
+Passwords must be hashed before storage (use bcryptjs).
+
+Validate login credentials using Joi.
+
+✅ 2. Notice Board Management
+Authenticated admins can:
+
+Upload notices with a title, description, optional PDF/image file, and a date.
+
+View a list of all uploaded notices.
+
+Delete a notice (optional).
+
+Use Multer for file uploads.
+
+Store files in a dedicated uploads/ directory.
+
+Ensure file type validation and file size limits.
+
+✅ 3. Security and Validation
+Use JWT to protect all routes (admin only).
+
+Environment variables stored securely via .env.
+
+Input validations using Joi (both for auth and notices).
+
+CORS policy applied.
+
+Use Mongoose for MongoDB schema modeling.
+
+Error handling middleware should be centralized.
+
+🗂️ Suggested File Structure:
+bash
+Copy
+Edit
+hitech-server/
+├── src/
+│   ├── config/            # MongoDB connection and environment setup
+│   ├── controllers/       # Request handling logic (auth, notices)
+│   ├── middlewares/       # Auth protection, error handling, file handling
+│   ├── models/            # Mongoose schemas (Admin, Notice)
+│   ├── routes/            # All routes (auth, notice)
+│   ├── utils/             # Helper functions (validators, file type checks)
+│   ├── uploads/           # Stored uploaded files (images/PDFs)
+│   └── index.ts           # Main Express server file
+├── .env                   # Environment variables
+├── package.json
+├── tsconfig.json
+⚙️ Tech Stack:
+Tool	Purpose
+Node.js	Runtime environment
+Express.js	Web server framework
+TypeScript	Type-safe development
+Mongoose	MongoDB object modeling
+Multer	File upload middleware
+Joi	Request data validation
+JWT	Token-based authentication
+bcryptjs	Password hashing
+dotenv	Environment variable management
+CORS	Cross-Origin Resource Sharing policy
+Morgan	HTTP logging middleware
+
+🧪 API Endpoints Overview
+Auth Routes
+Method	Route	Access	Description
+POST	/api/auth/signin	Public	Admin login, returns JWT
+
+Notice Routes
+Method	Route	Access	Description
+POST	/api/notices	Admin	Upload a new notice
+GET	/api/notices	Public	Fetch all notices
+DELETE	/api/notices/:id	Admin	Delete a notice (optional)
+
+✅ Deliverables:
+Full backend source code (TypeScript).
+
+Postman collection or API documentation.
+
+Clean .env.example file for deployment.
+
+File upload system with validations.
+
+Modular structure ready for future features (events, gallery, etc.).
+
