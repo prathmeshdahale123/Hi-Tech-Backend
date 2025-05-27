@@ -4,7 +4,7 @@ modules = ["nodejs-20"]
 channel = "stable-24_05"
 
 [workflows]
-runButton = "Project"
+runButton = "Hi-Tech Backend Server"
 
 [[workflows.workflow]]
 name = "Project"
@@ -26,3 +26,7 @@ waitForPort = 5000
 
 [deployment]
 run = ["sh", "-c", "npx tsx src/index.ts"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
