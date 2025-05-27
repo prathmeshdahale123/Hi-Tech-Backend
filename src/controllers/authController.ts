@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { Admin } from '../models/Admin';
 import { config } from '../config/environment';
 import { validateSignIn } from '../utils/validators';
@@ -54,7 +54,7 @@ export class AuthController {
         email: admin.email,
         role: admin.role
       };
-      const token = jwt.sign(payload, config.JWT_SECRET, { expiresIn: config.JWT_EXPIRE });
+      const token = jwt.sign(payload, config.JWT_SECRET, { expiresIn: '24h' });
 
       // Update last login
       admin.lastLogin = new Date();

@@ -21,8 +21,8 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npx ts-node src/index.ts"
+args = "npx tsx src/index.ts"
 waitForPort = 5000
 
 [deployment]
-run = ["sh", "-c", "npx ts-node src/index.ts"]
+run = ["sh", "-c", "npx tsx src/index.ts"]
