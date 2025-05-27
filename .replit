@@ -1,0 +1,28 @@
+modules = ["nodejs-20"]
+
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Hi-Tech Backend Server"
+
+[[workflows.workflow]]
+name = "Hi-Tech Backend Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx ts-node src/index.ts"
+waitForPort = 5000
+
+[deployment]
+run = ["sh", "-c", "npx ts-node src/index.ts"]
