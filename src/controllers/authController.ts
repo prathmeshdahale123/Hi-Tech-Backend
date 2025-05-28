@@ -49,7 +49,7 @@ export class AuthController {
       }
 
       // Generate JWT token
-      const payload = { 
+      const payload = {
         adminId: admin._id?.toString() || '',
         email: admin.email,
         role: admin.role
@@ -60,11 +60,18 @@ export class AuthController {
       admin.lastLogin = new Date();
       await admin.save();
 
+      // Set token in HTTP-only cookie
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        sameSite: 'none'
+      });
+
       res.status(200).json({
         success: true,
         message: 'Authentication successful',
         data: {
-          token,
           admin: {
             id: admin._id,
             name: admin.name,
@@ -91,7 +98,7 @@ export class AuthController {
   static async getProfile(req: Request, res: Response): Promise<void> {
     try {
       const adminId = (req as any).admin.adminId;
-      
+
       const admin = await Admin.findById(adminId);
       if (!admin) {
         res.status(404).json({
@@ -131,7 +138,6 @@ export class AuthController {
    */
   static async verifyToken(req: Request, res: Response): Promise<void> {
     try {
-      // If we reach here, the auth middleware has already verified the token
       res.status(200).json({
         success: true,
         message: 'Token is valid',
@@ -144,6 +150,32 @@ export class AuthController {
       res.status(500).json({
         success: false,
         message: 'Internal server error during token verification'
+      });
+    }
+  }
+
+  /**
+   * Admin logout
+   * POST /api/auth/logout
+   */
+  static async logout(req: Request, res: Response): Promise<void> {
+    try {
+      res.clearCookie('token', {
+        httpOnly: true,
+        sameSite: 'none',
+        secure: process.env.NODE_ENV === 'production'
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'Logged out successfully'
+      });
+
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error during logout'
       });
     }
   }

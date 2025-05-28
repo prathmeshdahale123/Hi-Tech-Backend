@@ -18,18 +18,16 @@ export const authenticateAdmin = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    // Get token from Authorization header
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // Get token from cookies
+    const token = req.cookies?.token;
+
+    if (!token) {
       res.status(401).json({
         success: false,
-        message: 'Access denied. No token provided or invalid format.'
+        message: 'Access denied. No token provided.'
       });
       return;
     }
-
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
     // Verify token
     const decoded = jwt.verify(token, config.JWT_SECRET) as JwtPayload;

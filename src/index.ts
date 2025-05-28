@@ -7,6 +7,7 @@ import { config, validateEnvironment } from './config/environment';
 import authRoutes from './routes/authRoutes';
 import noticeRoutes from './routes/noticeRoutes';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler';
+import cookieParser from 'cookie-parser';
 
 /**
  * Hi-Tech Institute Admin Backend Server
@@ -45,6 +46,8 @@ class Server {
     // Body parsing middleware
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+    this.app.use(cookieParser());
 
     // Serve static files from uploads directory
     this.app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));

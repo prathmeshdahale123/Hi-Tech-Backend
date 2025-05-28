@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -20,6 +22,7 @@
     "@types/node": "^22.15.21",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.1",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
@@ -28,9 +31,12 @@
     "mongoose": "^8.15.1",
     "morgan": "^1.10.0",
     "multer": "^2.0.0",
+    "tsx": "^4.19.4"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
-    "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   }
 }

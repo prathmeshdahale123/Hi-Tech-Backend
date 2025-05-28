@@ -28,4 +28,6 @@ router.get('/profile', authenticateAdmin, AuthController.getProfile);
  */
 router.get('/verify', authenticateAdmin, AuthController.verifyToken);
 
+router.post('/logout', AuthController.logout)
+
 export default router;
