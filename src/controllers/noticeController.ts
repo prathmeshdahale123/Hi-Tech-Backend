@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { Notice } from '../models/Notice';
 import { validateNotice } from '../utils/validators';
-import { deleteFile } from '../utils/fileHelpers';
+import { uploadToCloudinary, deleteFromCloudinary } from '../config/cloudinary';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Notice management controller

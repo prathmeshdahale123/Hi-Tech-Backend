@@ -1,14 +1,19 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
 /**
- * File attachment interface
+ * File attachment interface for Cloudinary integration
  */
 interface IAttachment {
   filename: string;
   originalName: string;
-  path: string;
+  url: string; // Cloudinary URL
+  publicId: string; // Cloudinary public ID for deletions
   size: number;
   mimeType: string;
+  format: string; // File format from Cloudinary
+  resourceType: string; // image, video, raw, etc.
+  width?: number; // For images/videos
+  height?: number; // For images/videos
 }
 
 /**
@@ -27,7 +32,7 @@ export interface INotice extends Document {
 }
 
 /**
- * Attachment schema
+ * Attachment schema for Cloudinary integration
  */
 const attachmentSchema = new Schema<IAttachment>({
   filename: {
@@ -38,7 +43,11 @@ const attachmentSchema = new Schema<IAttachment>({
     type: String,
     required: true
   },
-  path: {
+  url: {
+    type: String,
+    required: true
+  },
+  publicId: {
     type: String,
     required: true
   },
@@ -49,6 +58,22 @@ const attachmentSchema = new Schema<IAttachment>({
   mimeType: {
     type: String,
     required: true
+  },
+  format: {
+    type: String,
+    required: true
+  },
+  resourceType: {
+    type: String,
+    required: true
+  },
+  width: {
+    type: Number,
+    required: false
+  },
+  height: {
+    type: Number,
+    required: false
   }
 }, { _id: false });
 
@@ -112,11 +137,11 @@ noticeSchema.index({ isActive: 1 });
 noticeSchema.index({ title: 'text', description: 'text' }); // Text search index
 
 /**
- * Virtual for attachment URL (if needed for serving files)
+ * Virtual for attachment URL (returns Cloudinary URL)
  */
 noticeSchema.virtual('attachmentUrl').get(function() {
   if (this.attachment) {
-    return `/uploads/${this.attachment.filename}`;
+    return this.attachment.url;
   }
   return null;
 });
