@@ -18,11 +18,6 @@ export class NoticeController {
       // Validate request body
       const { error, value } = validateNotice(req.body);
       if (error) {
-        // Clean up uploaded file if validation fails
-        if (req.file) {
-          await deleteFile(req.file.path);
-        }
-        
         res.status(400).json({
           success: false,
           message: 'Validation error',
@@ -43,15 +38,51 @@ export class NoticeController {
         updatedBy: adminId
       };
 
-      // Add file information if file was uploaded
+      // Handle file upload to Cloudinary if file was uploaded
       if (req.file) {
-        noticeData.attachment = {
-          filename: req.file.filename,
-          originalName: req.file.originalname,
-          path: req.file.path,
-          size: req.file.size,
-          mimeType: req.file.mimetype
-        };
+        try {
+          // Create temporary file path from buffer
+          const tempFileName = `temp_${Date.now()}_${req.file.originalname}`;
+          const tempFilePath = path.join(process.cwd(), 'uploads', tempFileName);
+          
+          // Ensure uploads directory exists
+          const uploadsDir = path.join(process.cwd(), 'uploads');
+          if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+          }
+          
+          // Write buffer to temporary file
+          fs.writeFileSync(tempFilePath, req.file.buffer);
+          
+          // Upload to Cloudinary
+          const cloudinaryResult = await uploadToCloudinary(tempFilePath, {
+            public_id: `notice_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`
+          });
+          
+          // Delete temporary file
+          fs.unlinkSync(tempFilePath);
+          
+          // Add Cloudinary file information
+          noticeData.attachment = {
+            filename: req.file.originalname,
+            originalName: req.file.originalname,
+            url: cloudinaryResult.url,
+            publicId: cloudinaryResult.publicId,
+            size: req.file.size,
+            mimeType: req.file.mimetype,
+            format: cloudinaryResult.format,
+            resourceType: cloudinaryResult.resourceType,
+            width: cloudinaryResult.width,
+            height: cloudinaryResult.height
+          };
+        } catch (uploadError) {
+          console.error('Cloudinary upload error:', uploadError);
+          res.status(500).json({
+            success: false,
+            message: 'Failed to upload file to cloud storage'
+          });
+          return;
+        }
       }
 
       // Create notice
@@ -71,11 +102,6 @@ export class NoticeController {
 
     } catch (error) {
       console.error('Create notice error:', error);
-      
-      // Clean up uploaded file if database operation fails
-      if (req.file) {
-        await deleteFile(req.file.path);
-      }
 
       res.status(500).json({
         success: false,
@@ -179,11 +205,6 @@ export class NoticeController {
       // Find existing notice
       const existingNotice = await Notice.findById(id);
       if (!existingNotice) {
-        // Clean up uploaded file if notice doesn't exist
-        if (req.file) {
-          await deleteFile(req.file.path);
-        }
-        
         res.status(404).json({
           success: false,
           message: 'Notice not found'
@@ -194,11 +215,6 @@ export class NoticeController {
       // Validate request body
       const { error, value } = validateNotice(req.body);
       if (error) {
-        // Clean up uploaded file if validation fails
-        if (req.file) {
-          await deleteFile(req.file.path);
-        }
-        
         res.status(400).json({
           success: false,
           message: 'Validation error',
@@ -218,21 +234,56 @@ export class NoticeController {
         updatedAt: new Date()
       };
 
-      // Handle file replacement
+      // Handle file replacement with Cloudinary
       if (req.file) {
-        // Delete old file if it exists
-        if (existingNotice.attachment?.path) {
-          await deleteFile(existingNotice.attachment.path);
-        }
+        try {
+          // Delete old file from Cloudinary if it exists
+          if (existingNotice.attachment?.publicId) {
+            await deleteFromCloudinary(existingNotice.attachment.publicId);
+          }
 
-        // Add new file information
-        updateData.attachment = {
-          filename: req.file.filename,
-          originalName: req.file.originalname,
-          path: req.file.path,
-          size: req.file.size,
-          mimeType: req.file.mimetype
-        };
+          // Create temporary file path from buffer
+          const tempFileName = `temp_${Date.now()}_${req.file.originalname}`;
+          const tempFilePath = path.join(process.cwd(), 'uploads', tempFileName);
+          
+          // Ensure uploads directory exists
+          const uploadsDir = path.join(process.cwd(), 'uploads');
+          if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+          }
+          
+          // Write buffer to temporary file
+          fs.writeFileSync(tempFilePath, req.file.buffer);
+          
+          // Upload to Cloudinary
+          const cloudinaryResult = await uploadToCloudinary(tempFilePath, {
+            public_id: `notice_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`
+          });
+          
+          // Delete temporary file
+          fs.unlinkSync(tempFilePath);
+
+          // Add new Cloudinary file information
+          updateData.attachment = {
+            filename: req.file.originalname,
+            originalName: req.file.originalname,
+            url: cloudinaryResult.url,
+            publicId: cloudinaryResult.publicId,
+            size: req.file.size,
+            mimeType: req.file.mimetype,
+            format: cloudinaryResult.format,
+            resourceType: cloudinaryResult.resourceType,
+            width: cloudinaryResult.width,
+            height: cloudinaryResult.height
+          };
+        } catch (uploadError) {
+          console.error('Cloudinary upload error:', uploadError);
+          res.status(500).json({
+            success: false,
+            message: 'Failed to upload file to cloud storage'
+          });
+          return;
+        }
       }
 
       // Update notice
@@ -253,11 +304,6 @@ export class NoticeController {
 
     } catch (error) {
       console.error('Update notice error:', error);
-      
-      // Clean up uploaded file if database operation fails
-      if (req.file) {
-        await deleteFile(req.file.path);
-      }
 
       res.status(500).json({
         success: false,
@@ -283,9 +329,14 @@ export class NoticeController {
         return;
       }
 
-      // Delete associated file if it exists
-      if (notice.attachment?.path) {
-        await deleteFile(notice.attachment.path);
+      // Delete associated file from Cloudinary if it exists
+      if (notice.attachment?.publicId) {
+        try {
+          await deleteFromCloudinary(notice.attachment.publicId);
+        } catch (cloudinaryError) {
+          console.error('Error deleting file from Cloudinary:', cloudinaryError);
+          // Continue with notice deletion even if Cloudinary deletion fails
+        }
       }
 
       // Delete notice from database

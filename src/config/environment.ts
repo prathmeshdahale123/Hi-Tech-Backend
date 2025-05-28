@@ -13,6 +13,9 @@ interface Config {
   MAX_FILE_SIZE: number;
   ALLOWED_FILE_TYPES: string[];
   CORS_ORIGIN: string | string[];
+  CLOUDINARY_CLOUD_NAME: string;
+  CLOUDINARY_API_KEY: string;
+  CLOUDINARY_API_SECRET: string;
 }
 
 /**
@@ -33,7 +36,10 @@ export const config: Config = {
     'image/webp',
     'application/pdf'
   ],
-  CORS_ORIGIN: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000', 'http://localhost:5000']
+  CORS_ORIGIN: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000', 'http://localhost:5000'],
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '',
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || ''
 };
 
 /**

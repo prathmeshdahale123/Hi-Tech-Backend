@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { NoticeController } from '../controllers/noticeController';
 import { authenticateAdmin } from '../middlewares/auth';
-import { optionalFileUpload } from '../middlewares/fileUpload';
+import { optionalCloudinaryUpload } from '../middlewares/cloudinaryUpload';
 
 /**
  * Notice management routes
@@ -16,7 +16,7 @@ const router = Router();
 router.post(
   '/',
   authenticateAdmin,
-  optionalFileUpload,
+  optionalCloudinaryUpload,
   NoticeController.createNotice
 );
 
@@ -42,7 +42,7 @@ router.get('/:id', NoticeController.getNoticeById);
 router.put(
   '/:id',
   authenticateAdmin,
-  optionalFileUpload,
+  optionalCloudinaryUpload,
   NoticeController.updateNotice
 );
 
