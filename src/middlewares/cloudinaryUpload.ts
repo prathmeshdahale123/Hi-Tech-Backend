@@ -97,6 +97,8 @@ export const optionalCloudinaryUpload = (req: Request, res: any, next: any) => {
  * Required file upload middleware for Cloudinary - requires a file to be uploaded
  */
 export const requiredCloudinaryUpload = (req: Request, res: any, next: any) => {
+   console.log('--- Incoming Upload ---');
+  console.log('req.headers.content-type:', req.headers['content-type']);
   uploadSingle(req, res, (error) => {
     if (error) {
       return handleMulterError(error, req, res, next);

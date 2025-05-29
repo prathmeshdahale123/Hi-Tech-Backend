@@ -8,6 +8,7 @@ import authRoutes from './routes/authRoutes';
 import noticeRoutes from './routes/noticeRoutes';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler';
 import cookieParser from 'cookie-parser';
+import galleryRoutes from './routes/galleryRoutes';
 
 /**
  * Hi-Tech Institute Admin Backend Server
@@ -79,6 +80,7 @@ class Server {
     // API routes
     this.app.use('/api/auth', authRoutes);
     this.app.use('/api/notices', noticeRoutes);
+    this.app.use('/api/gallery', galleryRoutes);
 
     // API documentation endpoint
     this.app.get('/api', (_req, res) => {
@@ -98,6 +100,9 @@ class Server {
             getById: 'GET /api/notices/:id',
             update: 'PUT /api/notices/:id',
             delete: 'DELETE /api/notices/:id'
+          },
+          gallery: {
+            uploadImage : 'POST /api/gallery'
           }
         },
         documentation: 'https://github.com/hitech-institute/admin-backend'
