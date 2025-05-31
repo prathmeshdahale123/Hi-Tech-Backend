@@ -12,7 +12,20 @@ export const uploadImageToGallery = asyncHandler(async (req: Request, res: Respo
     throw new Error('No file uploaded');
   }
 
-  const { title, description } = req.body;
+  const { title, description, category, date } = req.body;
+
+  // Validate required fields
+  if (!title || !category) {
+    res.status(400);
+    throw new Error('Title and category are required');
+  }
+
+  // Validate and parse date if provided
+  let parsedDate = date ? new Date(date) : new Date();
+  if (date && isNaN(parsedDate.getTime())) {
+    res.status(400);
+    throw new Error('Invalid date format');
+  }
 
   const uploadResult = await cloudinaryUtils.upload(req.file.buffer, 'hitech-institute/gallery');
 
@@ -27,7 +40,9 @@ export const uploadImageToGallery = asyncHandler(async (req: Request, res: Respo
       width: uploadResult.width,
       height: uploadResult.height,
     },
-    uploadedBy: (req as any).admin.adminId
+    category,
+    date: parsedDate,
+    uploadedBy: (req as any).admin.adminId,
   });
 
   res.status(201).json({
@@ -37,8 +52,11 @@ export const uploadImageToGallery = asyncHandler(async (req: Request, res: Respo
   });
 });
 
+// @desc    Get all images from the gallery
+// @route   GET /api/gallery
+// @access  Public (or adjust based on your needs)
 export const getAllGalleryImages = asyncHandler(async (req: Request, res: Response) => {
-  const images = await Gallery.find().sort({ createdAt: -1 });
+  const images = await Gallery.find().sort({ date: -1 }); // Sort by custom date
 
   res.status(200).json({
     success: true,
@@ -61,9 +79,9 @@ export const deleteGalleryImage = asyncHandler(async (req: Request, res: Respons
   // Delete from Cloudinary
   const publicId = image.image?.publicId;
 
-if (typeof publicId === 'string') {
-  await cloudinaryUtils.delete(publicId);
-}
+  if (typeof publicId === 'string') {
+    await cloudinaryUtils.delete(publicId);
+  }
   // Delete from DB
   await image.deleteOne();
 
@@ -84,10 +102,20 @@ export const updateGalleryImage = asyncHandler(async (req: Request, res: Respons
     throw new Error('Image not found');
   }
 
-  const { title, description } = req.body;
+  const { title, description, category, date } = req.body;
 
+  // Update fields if provided
   image.title = title || image.title;
   image.description = description || image.description;
+  image.category = category || image.category;
+  if (date) {
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      res.status(400);
+      throw new Error('Invalid date format');
+    }
+    image.date = parsedDate;
+  }
 
   const updatedImage = await image.save();
 
@@ -97,4 +125,3 @@ export const updateGalleryImage = asyncHandler(async (req: Request, res: Respons
     data: updatedImage,
   });
 });
-
